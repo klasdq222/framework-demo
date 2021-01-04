@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.klasdq.demo.persistence.dao.TestUserDao">
+    <sql id="columns">
+        id,
+        username,
+        age,
+        phone_num,
+        password,
+        create_dt,
+        update_dt
+    </sql>
+
+    <resultMap id="ResultMap" type="com.klasdq.demo.domain.bean.TestUserBean">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="age" column="age"/>
+        <result property="phoneNum" column="phone_num"/>
+        <result property="password" column="password"/>
+        <result property="createDt" column="create_dt"/>
+        <result property="updateDt" column="update_dt"/>
+    </resultMap>
+
+    <sql id="dynamicSearchCondition">
+        <!-- 动态操作符查询 -->
+        <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isDynamicSearch(_parameter) and @com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(searchConditions)">
+            <foreach collection="searchConditions" index="fi" item="condition">
+                <if test="fi > 0"> AND </if>
+                <choose>
+                    <when test="condition.operator.name == 'IN'">
+                        ${condition.column} IN
+                        <foreach collection="condition.value" item="item" open="(" separator="," close=")">#{item}</foreach>
+                    </when>
+                    <when test="condition.operator.name == 'NOT_IN'">
+                        ${condition.column} NOT IN
+                        <foreach collection="condition.value" item="item" open="(" separator="," close=")">#{item}</foreach>
+                    </when>
+                    <when test="condition.operator.name == 'BETWEEN'">
+                        ${condition.column} BETWEEN #{condition.value.begin} AND #{condition.value.end}
+                    </when>
+                    <when test="condition.operator.name == 'IS_NULL'">
+                        ${condition.column} IS NULL
+                    </when>
+                    <when test="condition.operator.name == 'IS_NOT_NULL'">
+                        ${condition.column} IS NOT NULL
+                    </when>
+                    <when test="condition.operator.name == 'LIKE'">
+                        ${condition.column} LIKE "%"#{condition.value}"%"
+                    </when>
+                    <when test="condition.operator.name == 'LEFT_LIKE'">
+                        ${condition.column} LIKE #{condition.value}"%"
+                    </when>
+                    <otherwise>
+                        ${condition.column} ${condition.operator.code} #{condition.value}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
+        <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isDynamicSearch(_parameter) and @com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(searchConditionGroups)">
+            <foreach collection="searchConditionGroups" index="gi" item="group">
+                ${group.outerConnector.name} (
+                <foreach collection="group.conditions" index="fi" item="condition">
+                    <if test="fi > 0">${group.innerConnector.name}</if>
+                    <choose>
+                        <when test="condition.operator.name == 'IN'">
+                            ${condition.column} IN
+                            <foreach collection="condition.value" item="item" open="(" separator="," close=")">#{item}</foreach>
+                        </when>
+                        <when test="condition.operator.name == 'NOT_IN'">
+                            ${condition.column} NOT IN
+                            <foreach collection="condition.value" item="item" open="(" separator="," close=")">#{item}</foreach>
+                        </when>
+                        <when test="condition.operator.name == 'BETWEEN'">
+                            ${condition.column} BETWEEN #{condition.value.begin} AND #{condition.value.end}
+                        </when>
+                        <when test="condition.operator.name == 'IS_NULL'">
+                            ${condition.column} IS NULL
+                        </when>
+                        <when test="condition.operator.name == 'IS_NOT_NULL'">
+                            ${condition.column} IS NOT NULL
+                        </when>
+                        <when test="condition.operator.name == 'LIKE'">
+                            ${condition.column} LIKE "%"#{condition.value}"%"
+                        </when>
+                        <when test="condition.operator.name == 'LEFT_LIKE'">
+                            ${condition.column} LIKE #{condition.value}"%"
+                        </when>
+                        <otherwise>
+                            ${condition.column} ${condition.operator.code} #{condition.value}
+                        </otherwise>
+                    </choose>
+                </foreach>
+                )
+            </foreach>
+        </if>
+    </sql>
+
+    <!--使用Qo作为查询对象 searchConditions searchConditionGroups-->
+    <sql id="searchCondition">
+        <where>
+            <if test="id != null">AND id=#{id}</if>
+            <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(username)">AND username = #{username}</if>
+            <if test="age != null">AND age=#{age}</if>
+            <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(phoneNum)">AND phone_num=#{phoneNum}</if>
+            <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(password)">AND password = #{password}</if>
+            <if test="createDt != null">AND create_dt = #{createDt}</if>
+            <if test="updateDt != null">AND update_dt = #{updateDt}</if>
+            <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(ids)">
+                AND id IN
+                <foreach collection="ids" item="item" separator="," open="(" close=")">#{item}</foreach>
+            </if>
+            <include refid="dynamicSearchCondition"/>
+        </where>
+    </sql>
+
+    <select id="get" parameterType="long" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM test_user_table
+        WHERE id = #{id}
+    </select>
+
+    <select id="select" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM test_user_table
+        <include refid="searchCondition"/>
+    </select>
+
+    <select id="selectPage" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM test_user_table
+        <include refid="searchCondition"/>
+    </select>
+
+    <sql id="insertSql">
+        INSERT INTO test_user_table (
+            username,
+            age,
+            phone_num,
+            password,
+            create_dt,
+            update_dt
+        ) VALUES (
+            #{username},
+            #{age},
+            #{phoneNum},
+            #{password},
+            #{createDt},
+            #{updateDt}
+        )
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        <include refid="insertSql"/>
+    </insert>
+
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id" parameterType="com.klasdq.demo.persistence.mybatis.BatchSaveParameter">
+        <include refid="insertSql"/>
+    </insert>
+
+    <update id="update" parameterType="com.klasdq.demo.domain.bean.TestUserBean">
+        UPDATE test_user_table
+        SET
+            username = #{username},
+            age = #{age},
+            phone_num = #{phoneNum},
+            password = #{password},
+            create_dt = #{createDt},
+            update_dt = #{updateDt}
+        WHERE id = #{id}
+    </update>
+
+    <update id="dynamicUpdate">
+        UPDATE test_user_table
+        <set>
+            <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(username)">username = #{username},</if>
+            <if test="age != null">age=#{age},</if>
+            <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(phoneNum)">phone_num=#{phoneNum},</if>
+            <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(password)">password = #{password},</if>
+            <if test="createDt != null">create_dt = #{createDt},</if>
+            <if test="updateDt != null">update_dt = #{updateDt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM test_user_table WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByIds">
+        DELETE FROM test_user_table WHERE id IN
+        <foreach collection="collection" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+</mapper>
