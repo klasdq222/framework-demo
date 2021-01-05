@@ -1,5 +1,6 @@
 package com.klasdq.demo.persistence.mybatis;
 
+import com.klasdq.demo.persistence.mybatis.enums.SQLConnector;
 import com.klasdq.demo.persistence.mybatis.enums.SQLOperator;
 
 import java.io.Serializable;
@@ -31,8 +32,20 @@ public class SearchCondition implements Serializable {
      * 列名 属性名对应的数据表中的列名
      */
     private String column;
+    /**
+     * 前置连接符
+     */
+    private SQLConnector connector;
+
+    public SearchCondition(SQLConnector connector, String column,SQLOperator operator, Object value) {
+        this.operator = operator;
+        this.value = value;
+        this.column = column;
+        this.connector = connector;
+    }
 
     public SearchCondition(String column, SQLOperator operator, Object value) {
+        this.connector  = SQLConnector.AND;
         this.column = column;
         this.operator = operator;
         this.value = value;
@@ -81,5 +94,13 @@ public class SearchCondition implements Serializable {
 
     public void setColumn(String column) {
         this.column = column;
+    }
+
+    public SQLConnector getConnector() {
+        return connector;
+    }
+
+    public void setConnector(SQLConnector connector) {
+        this.connector = connector;
     }
 }

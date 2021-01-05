@@ -26,7 +26,7 @@
         <!-- 动态操作符查询 -->
         <if test="@com.klasdq.demo.persistence.mybatis.Ognl@isDynamicSearch(_parameter) and @com.klasdq.demo.persistence.mybatis.Ognl@isNotEmpty(searchConditions)">
             <foreach collection="searchConditions" index="fi" item="condition">
-                <if test="fi > 0"> AND </if>
+                ${condition.connector.name}
                 <choose>
                     <when test="condition.operator.name == 'IN'">
                         ${condition.column} IN
