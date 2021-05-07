@@ -2,14 +2,14 @@ package com.klasdq.demo.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class BaseBean{
     private Long id;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date createDt;
+    private LocalDateTime createDt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date updateDt;
+    private LocalDateTime updateDt;
 
     public Long getId() {
         return id;
@@ -19,19 +19,19 @@ public class BaseBean{
         this.id = id;
     }
 
-    public Date getCreateDt() {
+    public LocalDateTime getCreateDt() {
         return createDt;
     }
 
-    public void setCreateDt(Date createDt) {
+    public void setCreateDt(LocalDateTime createDt) {
         this.createDt = createDt;
     }
 
-    public Date getUpdateDt() {
+    public LocalDateTime getUpdateDt() {
         return updateDt;
     }
 
-    public void setUpdateDt(Date updateDt) {
+    public void setUpdateDt(LocalDateTime updateDt) {
         this.updateDt = updateDt;
     }
 }
